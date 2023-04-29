@@ -1,19 +1,21 @@
 package trivia;
 
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.LinkedList;
+import java.util.List;
 
 // REFACTOR ME
 public class GameBetter implements IGame {
-   ArrayList players = new ArrayList();
-   int[] places = new int[6];
-   int[] purses = new int[6];
-   boolean[] inPenaltyBox = new boolean[6];
+   private final List<String> players = new ArrayList<>();
+   private final int[] places = new int[6];
+   private final int[] purses = new int[6];
+   private final boolean[] inPenaltyBox = new boolean[6];
 
-   LinkedList popQuestions = new LinkedList();
-   LinkedList scienceQuestions = new LinkedList();
-   LinkedList sportsQuestions = new LinkedList();
-   LinkedList rockQuestions = new LinkedList();
+   private final Deque<String> popQuestions = new LinkedList<>();
+   private final Deque<String> scienceQuestions = new LinkedList<>();
+   private final Deque<String> sportsQuestions = new LinkedList<>();
+   private final Deque<String> rockQuestions = new LinkedList<>();
 
    int currentPlayer = 0;
    boolean isGettingOutOfPenaltyBox;
@@ -27,12 +29,8 @@ public class GameBetter implements IGame {
       }
    }
 
-   public String createRockQuestion(int index) {
+   private String createRockQuestion(int index) {
       return "Rock Question " + index;
-   }
-
-   public boolean isPlayable() {
-      return (howManyPlayers() >= 2);
    }
 
    public boolean add(String playerName) {
@@ -42,11 +40,11 @@ public class GameBetter implements IGame {
       inPenaltyBox[howManyPlayers()] = false;
 
       System.out.println(playerName + " was added");
-      System.out.println("They are player number " + players.size());
+      System.out.println("They are player number " + howManyPlayers());
       return true;
    }
 
-   public int howManyPlayers() {
+   private int howManyPlayers() {
       return players.size();
    }
 
@@ -60,7 +58,9 @@ public class GameBetter implements IGame {
 
             System.out.println(players.get(currentPlayer) + " is getting out of the penalty box");
             places[currentPlayer] = places[currentPlayer] + roll;
-            if (places[currentPlayer] > 11) places[currentPlayer] = places[currentPlayer] - 12;
+            if (places[currentPlayer] > 11) {
+               places[currentPlayer] = places[currentPlayer] - 12;
+            }
 
             System.out.println(players.get(currentPlayer)
                                + "'s new location is "
@@ -75,7 +75,9 @@ public class GameBetter implements IGame {
       } else {
 
          places[currentPlayer] = places[currentPlayer] + roll;
-         if (places[currentPlayer] > 11) places[currentPlayer] = places[currentPlayer] - 12;
+         if (places[currentPlayer] > 11) {
+            places[currentPlayer] = places[currentPlayer] - 12;
+         }
 
          System.out.println(players.get(currentPlayer)
                             + "'s new location is "
@@ -87,28 +89,27 @@ public class GameBetter implements IGame {
    }
 
    private void askQuestion() {
-      if (currentCategory() == "Pop")
+      if (currentCategory().equals("Pop"))
          System.out.println(popQuestions.removeFirst());
-      if (currentCategory() == "Science")
+      if (currentCategory().equals("Science"))
          System.out.println(scienceQuestions.removeFirst());
-      if (currentCategory() == "Sports")
+      if (currentCategory().equals("Sports"))
          System.out.println(sportsQuestions.removeFirst());
-      if (currentCategory() == "Rock")
+      if (currentCategory().equals("Rock"))
          System.out.println(rockQuestions.removeFirst());
    }
 
 
    private String currentCategory() {
-      if (places[currentPlayer] == 0) return "Pop";
-      if (places[currentPlayer] == 4) return "Pop";
-      if (places[currentPlayer] == 8) return "Pop";
-      if (places[currentPlayer] == 1) return "Science";
-      if (places[currentPlayer] == 5) return "Science";
-      if (places[currentPlayer] == 9) return "Science";
-      if (places[currentPlayer] == 2) return "Sports";
-      if (places[currentPlayer] == 6) return "Sports";
-      if (places[currentPlayer] == 10) return "Sports";
-      return "Rock";
+      if (places[currentPlayer] % 4 == 0) {
+         return "Pop";
+      } else if (places[currentPlayer] % 4 == 1) {
+         return "Science";
+      } else if (places[currentPlayer] % 4 == 2) {
+         return "Sports";
+      } else {
+         return "Rock";
+      }
    }
 
    public boolean wasCorrectlyAnswered() {
