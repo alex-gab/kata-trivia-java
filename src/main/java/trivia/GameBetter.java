@@ -12,15 +12,16 @@ public class GameBetter implements IGame {
    private final int[] purses = new int[6];
    private final boolean[] inPenaltyBox = new boolean[6];
 
-   QuestionContext questionContext = new TriviaQuestionContext(50);
-   int currentPlayer = 0;
-   boolean isGettingOutOfPenaltyBox;
+   private final QuestionContext questionContext = new TriviaQuestionContext(50);
+   private int currentPlayer = 0;
+   private boolean isGettingOutOfPenaltyBox;
 
    public GameBetter() {
       for (Category category : values()) {
          questionContext.initializeDeck(category);
       }
    }
+
    public boolean add(String playerName) {
       players.add(playerName);
       places[howManyPlayers()] = 0;
