@@ -1,9 +1,9 @@
 package trivia;
 
 import java.util.ArrayList;
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
+
+import static trivia.Category.*;
 
 // REFACTOR ME
 public class GameBetter implements IGame {
@@ -12,27 +12,15 @@ public class GameBetter implements IGame {
    private final int[] purses = new int[6];
    private final boolean[] inPenaltyBox = new boolean[6];
 
-   private final Deque<String> popQuestions = new LinkedList<>();
-   private final Deque<String> scienceQuestions = new LinkedList<>();
-   private final Deque<String> sportsQuestions = new LinkedList<>();
-   private final Deque<String> rockQuestions = new LinkedList<>();
-
+   QuestionContext questionContext = new TriviaQuestionContext(50);
    int currentPlayer = 0;
    boolean isGettingOutOfPenaltyBox;
 
    public GameBetter() {
-      for (int i = 0; i < 50; i++) {
-         popQuestions.addLast("Pop Question " + i);
-         scienceQuestions.addLast(("Science Question " + i));
-         sportsQuestions.addLast(("Sports Question " + i));
-         rockQuestions.addLast(createRockQuestion(i));
+      for (Category category : values()) {
+         questionContext.initializeDeck(category);
       }
    }
-
-   private String createRockQuestion(int index) {
-      return "Rock Question " + index;
-   }
-
    public boolean add(String playerName) {
       players.add(playerName);
       places[howManyPlayers()] = 0;
@@ -65,7 +53,7 @@ public class GameBetter implements IGame {
             System.out.println(players.get(currentPlayer)
                                + "'s new location is "
                                + places[currentPlayer]);
-            System.out.println("The category is " + currentCategory());
+            System.out.println("The category is " + currentCategory().getName());
             askQuestion();
          } else {
             System.out.println(players.get(currentPlayer) + " is not getting out of the penalty box");
@@ -82,33 +70,25 @@ public class GameBetter implements IGame {
          System.out.println(players.get(currentPlayer)
                             + "'s new location is "
                             + places[currentPlayer]);
-         System.out.println("The category is " + currentCategory());
+         System.out.println("The category is " + currentCategory().getName());
          askQuestion();
       }
 
    }
 
    private void askQuestion() {
-      if (currentCategory().equals("Pop"))
-         System.out.println(popQuestions.removeFirst());
-      if (currentCategory().equals("Science"))
-         System.out.println(scienceQuestions.removeFirst());
-      if (currentCategory().equals("Sports"))
-         System.out.println(sportsQuestions.removeFirst());
-      if (currentCategory().equals("Rock"))
-         System.out.println(rockQuestions.removeFirst());
+      System.out.println(questionContext.retrieveQuestion(currentCategory()));
    }
 
-
-   private String currentCategory() {
+   private Category currentCategory() {
       if (places[currentPlayer] % 4 == 0) {
-         return "Pop";
+         return POP;
       } else if (places[currentPlayer] % 4 == 1) {
-         return "Science";
+         return SCIENCE;
       } else if (places[currentPlayer] % 4 == 2) {
-         return "Sports";
+         return SPORTS;
       } else {
-         return "Rock";
+         return ROCK;
       }
    }
 
