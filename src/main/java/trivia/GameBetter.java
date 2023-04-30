@@ -96,40 +96,33 @@ public class GameBetter implements IGame {
    public boolean wasCorrectlyAnswered() {
       if (inPenaltyBox[currentPlayer]) {
          if (isGettingOutOfPenaltyBox) {
-            System.out.println("Answer was correct!!!!");
-            purses[currentPlayer]++;
-            System.out.println(players.get(currentPlayer)
-                               + " now has "
-                               + purses[currentPlayer]
-                               + " Gold Coins.");
-
-            boolean winner = didPlayerWin();
-            currentPlayer++;
-            if (currentPlayer == players.size()) currentPlayer = 0;
-
-            return winner;
+            return isPlayerNotAWinner();
          } else {
-            currentPlayer++;
-            if (currentPlayer == players.size()) currentPlayer = 0;
+            incrementCurrentPlayer();
             return true;
          }
-
-
       } else {
-
-         System.out.println("Answer was corrent!!!!");
-         purses[currentPlayer]++;
-         System.out.println(players.get(currentPlayer)
-                            + " now has "
-                            + purses[currentPlayer]
-                            + " Gold Coins.");
-
-         boolean winner = didPlayerWin();
-         currentPlayer++;
-         if (currentPlayer == players.size()) currentPlayer = 0;
-
-         return winner;
+         return isPlayerNotAWinner();
       }
+   }
+
+   private boolean isPlayerNotAWinner() {
+      System.out.println("Answer was correct!!!!");
+      purses[currentPlayer]++;
+      System.out.println(players.get(currentPlayer)
+                         + " now has "
+                         + purses[currentPlayer]
+                         + " Gold Coins.");
+
+      boolean isNotAWinner = isNotAWinner();
+      incrementCurrentPlayer();
+
+      return isNotAWinner;
+   }
+
+   private void incrementCurrentPlayer() {
+      currentPlayer++;
+      if (currentPlayer == players.size()) currentPlayer = 0;
    }
 
    public boolean wrongAnswer() {
@@ -137,13 +130,12 @@ public class GameBetter implements IGame {
       System.out.println(players.get(currentPlayer) + " was sent to the penalty box");
       inPenaltyBox[currentPlayer] = true;
 
-      currentPlayer++;
-      if (currentPlayer == players.size()) currentPlayer = 0;
+      incrementCurrentPlayer();
       return true;
    }
 
 
-   private boolean didPlayerWin() {
+   private boolean isNotAWinner() {
       return !(purses[currentPlayer] == 6);
    }
 }
