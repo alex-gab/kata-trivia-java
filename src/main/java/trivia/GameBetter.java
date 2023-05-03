@@ -7,14 +7,10 @@ import static trivia.Category.*;
 
 // REFACTOR ME
 public class GameBetter implements IGame {
-   private final List<String> players = new ArrayList<>();
-   private final int[] places = new int[6];
-   private final int[] purses = new int[6];
-   private final boolean[] inPenaltyBox = new boolean[6];
-
+   private final List<Player> players = new ArrayList<>();
    private final QuestionContext questionContext = new TriviaQuestionContext(50);
-   private int currentPlayer = 0;
-   private boolean isGettingOutOfPenaltyBox;
+   private int currentPlayerIdx;
+   private Player currentPlayer;
 
    public GameBetter() {
       for (Category category : values()) {
@@ -23,11 +19,7 @@ public class GameBetter implements IGame {
    }
 
    public boolean add(String playerName) {
-      players.add(playerName);
-      places[howManyPlayers()] = 0;
-      purses[howManyPlayers()] = 0;
-      inPenaltyBox[howManyPlayers()] = false;
-
+      players.add(new Player(playerName));
       System.out.println(playerName + " was added");
       System.out.println("They are player number " + howManyPlayers());
       return true;
@@ -38,42 +30,33 @@ public class GameBetter implements IGame {
    }
 
    public void roll(int roll) {
-      System.out.println(players.get(currentPlayer) + " is the current player");
+      currentPlayer = players.get(currentPlayerIdx);
+      System.out.println(currentPlayer.getName() + " is the current player");
       System.out.println("They have rolled a " + roll);
 
-      if (inPenaltyBox[currentPlayer]) {
+      if (currentPlayer.isInPenaltyBox()) {
          if (roll % 2 != 0) {
-            isGettingOutOfPenaltyBox = true;
-
-            System.out.println(players.get(currentPlayer) + " is getting out of the penalty box");
+            currentPlayer.setGettingOutOfPenaltyBox(true);
+            System.out.println(currentPlayer.getName() + " is getting out of the penalty box");
             continueToPlay(roll);
          } else {
-            System.out.println(players.get(currentPlayer) + " is not getting out of the penalty box");
-            isGettingOutOfPenaltyBox = false;
+            System.out.println(currentPlayer.getName() + " is not getting out of the penalty box");
+            currentPlayer.setGettingOutOfPenaltyBox(false);
          }
-
       } else {
-
          continueToPlay(roll);
       }
 
    }
 
    private void continueToPlay(int roll) {
-      calculatePlayerPlace(roll);
+      currentPlayer.calculatePlace(roll);
 
-      System.out.println(players.get(currentPlayer)
+      System.out.println(currentPlayer.getName()
                          + "'s new location is "
-                         + places[currentPlayer]);
+                         + currentPlayer.getPlace());
       System.out.println("The category is " + currentCategory().getName());
       askQuestion();
-   }
-
-   private void calculatePlayerPlace(int roll) {
-      places[currentPlayer] = places[currentPlayer] + roll;
-      if (places[currentPlayer] > 11) {
-         places[currentPlayer] = places[currentPlayer] - 12;
-      }
    }
 
    private void askQuestion() {
@@ -81,60 +64,57 @@ public class GameBetter implements IGame {
    }
 
    private Category currentCategory() {
-      if (places[currentPlayer] % 4 == 0) {
-         return POP;
-      } else if (places[currentPlayer] % 4 == 1) {
-         return SCIENCE;
-      } else if (places[currentPlayer] % 4 == 2) {
-         return SPORTS;
-      } else {
-         return ROCK;
+      switch (currentPlayer.getPlace() % 4) {
+         case 0: return POP;
+         case 1: return SCIENCE;
+         case 2: return SPORTS;
+         default: return ROCK;
       }
    }
 
    public boolean wasCorrectlyAnswered() {
-      if (inPenaltyBox[currentPlayer]) {
-         if (isGettingOutOfPenaltyBox) {
-            return isPlayerNotAWinner();
+      boolean isNotAWinner;
+      if (currentPlayer.isInPenaltyBox()) {
+         if (currentPlayer.isGettingOutOfPenaltyBox()) {
+            System.out.println("Answer was correct!!!!");
+            receiveCoins();
+            isNotAWinner = isNotAWinner();
          } else {
-            incrementCurrentPlayer();
-            return true;
+            isNotAWinner = true;
          }
       } else {
-         return isPlayerNotAWinner();
+         System.out.println("Answer was correct!!!!");
+         receiveCoins();
+         isNotAWinner = isNotAWinner();
       }
-   }
 
-   private boolean isPlayerNotAWinner() {
-      System.out.println("Answer was correct!!!!");
-      purses[currentPlayer]++;
-      System.out.println(players.get(currentPlayer)
-                         + " now has "
-                         + purses[currentPlayer]
-                         + " Gold Coins.");
-
-      boolean isNotAWinner = isNotAWinner();
-      incrementCurrentPlayer();
-
+      moveToNextPlayer();
       return isNotAWinner;
    }
 
-   private void incrementCurrentPlayer() {
-      currentPlayer++;
-      if (currentPlayer == players.size()) currentPlayer = 0;
+   private void receiveCoins() {
+      currentPlayer.receiveCoin();
+      System.out.println(currentPlayer.getName()
+                         + " now has "
+                         + currentPlayer.getCoins()
+                         + " Gold Coins.");
+   }
+
+   private void moveToNextPlayer() {
+      currentPlayerIdx++;
+      if (currentPlayerIdx == players.size()) currentPlayerIdx = 0;
    }
 
    public boolean wrongAnswer() {
       System.out.println("Question was incorrectly answered");
-      System.out.println(players.get(currentPlayer) + " was sent to the penalty box");
-      inPenaltyBox[currentPlayer] = true;
-
-      incrementCurrentPlayer();
+      System.out.println(currentPlayer.getName() + " was sent to the penalty box");
+      currentPlayer.setInPenaltyBox(true);
+      moveToNextPlayer();
       return true;
    }
 
 
    private boolean isNotAWinner() {
-      return !(purses[currentPlayer] == 6);
+      return !(currentPlayer.getCoins() == 6);
    }
 }
